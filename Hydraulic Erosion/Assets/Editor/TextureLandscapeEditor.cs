@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(TerraintTextureGen))]
+[CustomEditor(typeof(TerrainTextureGen))]
 public class MeshGenEditor : Editor
 {
     public override void OnInspectorGUI()
     {
-        TerraintTextureGen mc = (TerraintTextureGen)target;
+        TerrainTextureGen mc = (TerrainTextureGen)target;
 
         if (DrawDefaultInspector())
         {

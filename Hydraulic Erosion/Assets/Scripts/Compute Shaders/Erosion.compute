@@ -1,0 +1,170 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+int sizeX, sizeY;
+int lifetime;
+int brushSize;
+float startSpeed;
+float accel;
+float drag;
+float startWater;
+float sedimentCapaFactor;
+float depSpeed;
+float eroSpeed;
+float gravity;
+float evaporateSpeed;
+
+RWStructuredBuffer<float> map;
+//RWStructuredBuffer<float3> changes;
+StructuredBuffer<float2> startPos;
+StructuredBuffer<float3> brush;
+
+
+float3 calcHeightandGrad(float posX, float posY, int sizeX, int sizeY)
+{
+    int x = (int) posX;
+    int y = (int) posY;
+    
+    int left = max(0, x - 1) * sizeY + y;
+    int right = min(sizeX - 1, x + 1) * sizeY + y;
+    int down = x * sizeY + max(0, y - 1);
+    int up = x * sizeY + min(sizeY - 1, y + 1);
+    
+    float height = map[x * sizeY + y];
+    
+    float gradX = map[right] - map[left];
+    float gradY = map[up] - map[down];
+    
+    return float3(height, gradX, gradY);
+}
+
+float3 calcHeightandGrad2(float posX, float posY, int sizeX, int sizeY)
+{
+    int x = (int) posX;
+    int y = (int) posY;
+    float u = posX - x;
+    float v = posY - y;
+    
+    float a = map[x * sizeY + y];
+    float b = map[(x + 1) * sizeY + y];
+    float c = map[x * sizeY + y + 1];
+    float d = map[(x + 1) * sizeY + y + 1];
+    
+    float height = (1 - v) * ((1 - u) * a + u * b) + v * ((1 - u) * c + u * d);
+    float gradX = (1 - v) * (b - a) + v * (d - c);
+    float gradY = (1 - u) * (c - a) + u * (d - b);
+    
+    return float3(height, gradX, gradY);
+}
+
+[numthreads(1000,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float posX = startPos[id.x].x;
+    float posY = startPos[id.x].y;
+    float nposX = posX, nposY = posY;
+    
+    float speed = startSpeed;
+    
+    float dirX = 0;
+    float dirY = 0;
+    float currHeight = 0;
+    
+    float water = startWater;
+    float sediment = 0;
+    
+    float3 cs[300];
+    
+    for (int i = 0; i < 300; i++)
+    {
+        cs[i] = float3(0, 0, 0);
+    }
+    
+        for (int life = 0; life < lifetime; life++)
+        {
+            float3 heightGrad = calcHeightandGrad2(posX, posY, sizeX, sizeY);
+            dirX = (1 - drag) * dirX - accel * heightGrad.y;
+            dirY = (1 - drag) * dirY - accel * heightGrad.z;
+            currHeight = heightGrad.x;
+        
+            float vel = max(0.00001, sqrt(dirX * dirX + dirY * dirY));
+            dirX /= vel;
+            dirY /= vel;
+            nposX += dirX;
+            nposY += dirY;
+        
+            if (nposX < 0 || nposY < 0 || nposX >= sizeX - 1 || nposY >= sizeY - 1 || (dirX == 0 && dirY == 0))
+            {
+                break;
+            }
+        
+            float newheight = calcHeightandGrad2(nposX, nposY, sizeX, sizeY).x;
+        
+            float deltaHeight = newheight - currHeight;
+            float sedimentCapacity = abs(deltaHeight * speed * water * sedimentCapaFactor); //multiply by deltaheight for test
+        
+            if (deltaHeight > 0)
+            {
+                float depAmt = min(deltaHeight, sediment);
+                sediment -= depAmt;
+                cs[life] = float3(posX, posY, depAmt);
+            }
+            else
+            {
+                float eroAmt = 0;
+                if (sediment - sedimentCapacity > 0)
+                {
+                    eroAmt = (sediment - sedimentCapacity) * depSpeed;
+                }
+                else
+                {
+                    eroAmt = max(deltaHeight, (sediment - sedimentCapacity) * eroSpeed);
+                }
+                sediment -= eroAmt;
+                cs[life] = float3(posX, posY, eroAmt);
+            }
+        
+            posX = nposX;
+            posY = nposY;
+        
+            speed = sqrt(max(0, speed * speed - deltaHeight * gravity));
+            water *= (1 - evaporateSpeed);
+        }
+    
+    for (int life2 = 0; life2 < lifetime; life2++)
+    {
+        int dropId = life2;
+        float3 posAmt = cs[dropId];
+        float posX = posAmt.x, posY = posAmt.y, amt = posAmt.z;
+        int x = (int) posX, y = (int) posY;
+        float u = posX - x, v = posY - y;
+        
+        if(1)   //set this condtiton to 1 to stop using diffrent brush sizes
+        {
+            map[x * sizeY + y] += amt * (1 - u) * (1 - v);
+            map[(x + 1) * sizeY + y] += amt * (u) * (1 - v);
+            map[x * sizeY + y + 1] += amt * (1 - u) * (v);
+            map[(x + 1) * sizeY + y + 1] += amt * (u) * (v);
+        }
+        //else
+        //{
+        //    for (int i = 0; i < 4 * brushSize * brushSize; i++)
+        //    {
+        //        int iX = round(brush[i].x), iY = round(brush[i].y);
+        //        float wt = brush[i].z;
+                
+        //        if (x + iX < 0 || y + iY < 0 || x + iX >= sizeX - 1 || y + iY >= sizeY - 1)
+        //        {
+        //            continue;
+        //        }
+        //        else
+        //        {
+        //            float p = (iX > 0) ? u : 1 - u;
+        //            float q = (iY > 0) ? v : 1 - v;
+                    
+        //            map[(x + iX) * sizeY + y + iY] += p * q * wt * amt;
+        //        }
+        //    }
+        //}
+    }
+}

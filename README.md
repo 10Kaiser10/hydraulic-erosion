@@ -1,6 +1,6 @@
 # Hydraulic Erosion on Procedurally Generated Terrain
 
-Procedural Terrain Generation in Unity. Simulating erosion due to water to make the terrain look more natural. Using compute shader to run the simulation of GPU for massive improvements in simulation speed (Simulating a million water drops in 10 seconds).
+Procedural Terrain Generation in Unity. Simulating erosion due to water to make the terrain look more natural. Using compute shader to run the simulation on GPU for faster simulation speed (Simulating a million water drops in 10 seconds).
 
 
 - Generating Height Map image using perlin noise. Using a compute shader to run the code on GPU.

@@ -45,10 +45,13 @@ float3 calcHeightandGrad2(float posX, float posY, int sizeX, int sizeY)
     float u = posX - x;
     float v = posY - y;
     
+    int xn = min(x + 1, sizeX - 1);
+    int yn = min(y + 1, sizeY - 1);
+    
     float a = map[x * sizeY + y];
-    float b = map[(x + 1) * sizeY + y];
-    float c = map[x * sizeY + y + 1];
-    float d = map[(x + 1) * sizeY + y + 1];
+    float b = map[xn * sizeY + y];
+    float c = map[x * sizeY + yn];
+    float d = map[xn * sizeY + yn];
     
     float height = (1 - v) * ((1 - u) * a + u * b) + v * ((1 - u) * c + u * d);
     float gradX = (1 - v) * (b - a) + v * (d - c);
@@ -93,7 +96,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
             nposX += dirX;
             nposY += dirY;
         
-            if (nposX < 0 || nposY < 0 || nposX >= sizeX - 1 || nposY >= sizeY - 1 || (dirX == 0 && dirY == 0))
+            if (nposX < 0 || nposY < 0 || nposX >= sizeX || nposY >= sizeY || (dirX == 0 && dirY == 0))
             {
                 break;
             }
@@ -139,12 +142,15 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         int x = (int) posX, y = (int) posY;
         float u = posX - x, v = posY - y;
         
+        int xn = min(x + 1, sizeX - 1);
+        int yn = min(y + 1, sizeY - 1);
+        
         if(1)   //set this condtiton to 1 to stop using diffrent brush sizes
         {
             map[x * sizeY + y] += amt * (1 - u) * (1 - v);
-            map[(x + 1) * sizeY + y] += amt * (u) * (1 - v);
-            map[x * sizeY + y + 1] += amt * (1 - u) * (v);
-            map[(x + 1) * sizeY + y + 1] += amt * (u) * (v);
+            map[xn * sizeY + y] += amt * (u) * (1 - v);
+            map[x * sizeY + yn] += amt * (1 - u) * (v);
+            map[xn * sizeY + yn] += amt * (u) * (v);
         }
         //else
         //{

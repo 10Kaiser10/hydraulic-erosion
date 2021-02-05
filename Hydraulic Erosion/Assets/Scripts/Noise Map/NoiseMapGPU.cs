@@ -84,8 +84,8 @@ public static class NoiseMapGPU
         System.Random prng = new System.Random(seed);
         for (int i = 0; i < numIter; i++)
         {
-            StartPos[i].x = prng.Next(0, sizeX-2);
-            StartPos[i].y = prng.Next(0, sizeY-2);
+            StartPos[i].x = prng.Next(0, sizeX-1);
+            StartPos[i].y = prng.Next(0, sizeY-1);
         }
 
         //Vector3[] erosionArr = new Vector3[lifetime * numIter];

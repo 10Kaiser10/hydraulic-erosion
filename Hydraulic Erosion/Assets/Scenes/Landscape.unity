@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,8 +97,9 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: 32c3103aafb349e4ba38875342c04c28,
+  m_LightingDataAsset: {fileID: 112000000, guid: 8b5f10e42a1f9754e8962118ba1536b6,
+    type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 5babaf14ee1a9dd4caec7a27544e1520,
     type: 2}
 --- !u!196 &4
 NavMeshSettings:
@@ -136,7 +137,7 @@ GameObject:
   - component: {fileID: 852051436}
   - component: {fileID: 852051435}
   m_Layer: 0
-  m_Name: Landscape Plane
+  m_Name: Noise Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -199,7 +200,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 852051434}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 5017, y: -4208, z: 5049}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1000, y: 1, z: 1000}
   m_Children: []
   m_Father: {fileID: 0}
@@ -319,8 +320,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapCreator: {fileID: 1531176638}
   terrainMat: {fileID: 2100000, guid: 9b47abcac3570f54fb6ec2dde79522a6, type: 2}
-  grass: {r: 0.040009163, g: 0.41509432, b: 0, a: 0}
-  rock: {r: 0.3773585, g: 0.3363452, b: 0.21146315, a: 0}
+  grass: {r: 0.054444082, g: 0.20754719, b: 0, a: 0}
+  rock: {r: 0.4528302, g: 0.4328943, b: 0.36909932, a: 0}
   snow: {r: 1, g: 1, b: 1, a: 0}
   grassRockLim: 0.0018
   grassRockBlend: 0.002
@@ -352,7 +353,7 @@ GameObject:
   - component: {fileID: 1531176640}
   - component: {fileID: 1531176638}
   m_Layer: 0
-  m_Name: Landscape
+  m_Name: Landscape Generator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -372,15 +373,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapHeight: 250
   MapWidth: 250
-  elevation: 2000
+  elevation: 200
   scale: 1200
   octaves: 7
   lacunarity: 2
   persistance: 0.5
   seed: 26
   offset: {x: 8.25, y: -5.3}
-  numIter: 71584
-  lifetime: 38
+  numIter: 298367
+  lifetime: 128
   accel: 50
   drag: 0.1
   brushSize: 1
@@ -395,6 +396,7 @@ MonoBehaviour:
   ErosionShader: {fileID: 7200000, guid: a1f4a5c4c231bb543b588c15cc291ac7, type: 3}
   terrainMaterial: {fileID: 2100000, guid: 9b47abcac3570f54fb6ec2dde79522a6, type: 2}
   size: 4
+  parentObject: {fileID: 1669532213}
 --- !u!4 &1531176639
 Transform:
   m_ObjectHideFlags: 0
@@ -514,3 +516,33 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1669532213
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1669532214}
+  m_Layer: 0
+  m_Name: Landscape
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1669532214
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669532213}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

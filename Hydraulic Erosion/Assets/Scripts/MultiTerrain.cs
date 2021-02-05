@@ -40,27 +40,22 @@ public class MultiTerrain : MonoBehaviour
 
     public float[,] map;
 
-    GameObject[] objects;
-
     [Range(1,10)]
     public int size = 2;
 
+    public GameObject parentObject;
+
     public void DestroyAll()
     {
-        if(objects == null) { return; }
-        foreach(GameObject obj in objects)
+        int childs = parentObject.transform.childCount;
+        for (int i = childs - 1; i >= 0; i--)
         {
-            if(obj != null)
-            {
-                DestroyImmediate(obj);
-            }
+            GameObject.DestroyImmediate(parentObject.transform.GetChild(i).gameObject);
         }
     }
 
     public void GenerateLandscape()
     {
-        objects = new GameObject[size * size];
-
         if (scale <= 0) { scale = 0.00001f; }
         if (MapWidth <= 0) { MapWidth = 1; }
         if (MapHeight <= 0) { MapHeight = 1; }
@@ -88,28 +83,35 @@ public class MultiTerrain : MonoBehaviour
                 thisOffset.x = offset.x + i * MapWidth;
                 thisOffset.y = offset.y + j * MapHeight;
 
-                float[,] chunk = new float[MapWidth, MapHeight];
+                int chunkH = MapHeight + 1, chunkW = MapWidth + 1;
+                if(i == size - 1) { chunkW = MapWidth; }
+                if (j == size - 1) { chunkH = MapHeight; }
 
-                for (int x = 0; x < MapWidth; x++)
+                float[,] chunk = new float[chunkW, chunkH];
+
+                for (int x = 0; x < chunkW; x++)
                 {
-                    for (int y = 0; y < MapHeight; y++)
+                    for (int y = 0; y < chunkH; y++)
                     {
                         chunk[x, y] = map[i * MapWidth + x, j * MapHeight + y];
                     }
                 }
 
-                objects[i * size + j] = new GameObject();
-                GameObject obj = objects[i * size + j];
-                obj.transform.position = new Vector3(i * MapWidth * 10 - 10*i,0, j * MapHeight * 10 - 10*j);
-                obj.transform.localScale = new Vector3(10, 1, 10);
+                GameObject obj = new GameObject();
+
+                obj.transform.SetParent(parentObject.transform);
+                obj.transform.position = new Vector3(i * MapWidth,0, j * MapHeight);
+                obj.transform.localScale = new Vector3(1, 1, 1);
+
                 MeshFilter mf = obj.AddComponent<MeshFilter>();
                 MeshRenderer mr = obj.AddComponent<MeshRenderer>();
                 mr.sharedMaterial = terrainMaterial;
+
                 MeshCreator mc = obj.AddComponent<MeshCreator>();
                 mc.height = elevation;
                 mc.meshFilter = mf;
                 mc.meshRend = mr;
-                mc.CreateMesh(chunk, size, thisOffset);
+                mc.CreateMesh(chunk, size, thisOffset-offset);
                 
             }
         }
